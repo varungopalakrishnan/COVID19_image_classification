@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COVID-19 predictions</title>
+    <style>
+      * {
+        font-size: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <input
+      id="image-selector"
+      type="file"
+      accept="image/*"
+      onchange="openFile(event)"
+    />
+    <button id="predict-button">Predict</button>
+    <p style="font-weight: bold">Predictions</p>
+    <p>Negative:<span id="negative-prediction"></span></p>
+    <p>Positive:<span id="positive-prediction"></span></p>
+    <img id="selected-image" />
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+      let base64Image;
+      var openFile = function (file) {
+        var input = file.target;
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          var dataURL = reader.result;
+          var output = document.getElementById("selected-image");
+          output.src = dataURL;
+          base64Image = dataURL.replace("data:image/jpeg;base64,", "");
+          console.log(base64Image);
+        };
+        reader.readAsDataURL(input.files[0]);
+        $("#negative-prediction").text("");
+        $("#positive-prediction").text("");
+      };
+
+      $("#predict-button").click(function (event) {
+        let message = {
+          image: base64Image,
+        };
+        console.log(message);
+        $.post(
+          "http://127.0.0.1:5000/predict", //"http://127.0.0.1:5000/predict"
+          JSON.stringify(message),
+          function (response) {
+            $("#negative-prediction").text(
+              response.prediction.Negative.toFixed(6)
+            );
+            $("#positive-prediction").text(
+              response.prediction.Positive.toFixed(6)
+            );
+            console.log(response);
+          }
+        );
+      });
+    </script>
+  </body>
+</html>

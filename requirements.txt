@@ -1,0 +1,15 @@
+Flask
+Flask-Cors
+gunicorn
+h5py==2.10.0
+Keras
+Keras-Preprocessing
+numpy==1.16.0
+pandas
+Pillow
+scikit-learn
+scipy
+tensorboard
+tensorboard-plugin-wit
+tensorflow-cpu
+tensorflow-estimator
