@@ -1,16 +1,18 @@
-from flask import Flask
-from flask import request, jsonify, send_from_directory
+from flask import request, jsonify, send_from_directory, render_template, Flask
 from flask_cors import CORS, cross_origin
 import base64
 import numpy as np
 import io
+import os
 from PIL import Image
 import keras
 from keras.models import Sequential, load_model
 from keras.preprocessing.image import ImageDataGenerator, img_to_array
 
+RES_FOLDER = os.path.join('static', 'resources')
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = RES_FOLDER
 cors = CORS(app)
 
 
@@ -19,6 +21,10 @@ def get_model():
     model = load_model(
         "ML_model/Xception_model_Full.h5")
     print(' * model loaded')
+
+
+print("* loading keras model")
+get_model()
 
 
 def preprocess_image(image, ts):
@@ -32,9 +38,10 @@ def preprocess_image(image, ts):
     return image
 
 
-print("* loading keras model")
-
-get_model()
+@app.route('/')
+def home():
+    full_filename = os.path.join(app.config['UPLOAD_FOLDER'], 'nCT24.jpg')
+    return render_template("index.html", user_image=full_filename)
 
 
 @app.route('/predict', methods=['POST', 'GET'])  # get not required
@@ -56,7 +63,7 @@ def predict():
             'Positive': 100 * score[0]
         }
     }
-    return jsonify(response)
+    return jsonify(response)  # , render_template('index.html')
 
 
 if __name__ == '__main__':

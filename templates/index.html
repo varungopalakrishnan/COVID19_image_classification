@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COVID-19 predictions</title>
+    <!-- <style>
+      body {
+        /* url("covid_bg.jpg") */
+        background-image: url("static/covid19.jpg");
+        background-size: 1920px 1080px;
+        background-blend-mode: normal;
+      }
+    </style> -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script
+      type="text/javascript"
+      src="https://www.gstatic.com/charts/loader.js"
+    ></script>
+  </head>
+  <body>
+    <h1 style="margin: 10px">COVID-19 Predictions Using Lungs CT Scans</h1>
+    <div class="row" style="margin: 25px">
+      <div class="col">
+        <input
+          style="padding: 10px"
+          id="image-selector"
+          type="file"
+          accept="image/*"
+          onchange="openFile(event)"
+        />
+        <img
+          id="selected-image"
+          width="400"
+          height="400"
+          class="rounded"
+          src="{{user_image}}"
+        />
+      </div>
+      <div class="col">
+        <button
+          style="font-weight: bold"
+          class="btn btn-primary"
+          id="predict-button"
+        >
+          Predict
+        </button>
+        <h3 style="font-weight: bold; padding-top: 10px; padding-bottom: 10px">
+          Predictions:
+        </h3>
+        <p style="font-weight: bold">
+          COVID Negative Percentage:<span
+            class="text-primary"
+            id="negative-prediction"
+            >90.00</span
+          >
+        </p>
+        <p style="font-weight: bold">
+          COVID Positive Percentage:<span
+            class="text-danger"
+            id="positive-prediction"
+            >10.00</span
+          >
+        </p>
+        <div style="font-weight: bold" id="piechart"></div>
+      </div>
+    </div>
+    <script>
+      let base64Image;
+      var n, p;
+
+      var openFile = function (file) {
+        var input = file.target;
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          var dataURL = reader.result;
+          var output = document.getElementById("selected-image");
+          output.src = dataURL;
+          base64Image = dataURL.replace("data:image/jpeg;base64,", "");
+          console.log(base64Image);
+        };
+        reader.readAsDataURL(input.files[0]);
+        $("#negative-prediction").text("");
+        $("#positive-prediction").text("");
+      };
+
+      $("#predict-button").click(function (event) {
+        let message = {
+          image: base64Image,
+        };
+        console.log(message);
+        $.post(
+          "{{url_for('predict')}}", //"http://127.0.0.1:5000/predict"|| "{{url_for('predict')}}"
+          JSON.stringify(message),
+          function (response) {
+            n = response.prediction.Negative.toFixed(2);
+            p = response.prediction.Positive.toFixed(2);
+            google.charts.load("current", { packages: ["corechart"] });
+            google.charts.setOnLoadCallback(drawChart);
+
+            $("#negative-prediction").text(
+              response.prediction.Negative.toFixed(2)
+            );
+            $("#positive-prediction").text(
+              response.prediction.Positive.toFixed(2)
+            );
+            console.log(response);
+          }
+        );
+      });
+      //chart starts
+      google.charts.load("current", { packages: ["corechart"] });
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        console.log("n:", n);
+        if (n == undefined) {
+          n = 90.0;
+          p = 10.0;
+        }
+        console.log("n:", typeof n);
+        var data = google.visualization.arrayToDataTable([
+          ["COVID", "Percentage"],
+          ["Negative", parseFloat(n)],
+          ["Positive", parseFloat(p)],
+        ]);
+
+        // Optional; add a title and set the width and height of the chart
+        var options = {
+          title: "COVID-19 Pie Chart",
+          width: 550,
+          height: 400,
+          backgroundColor: "transparent",
+          fontSize: 15,
+          chartArea: { left: 0, top: 50 },
+        };
+
+        // Display the chart inside the <div> element with id="piechart"
+        var chart = new google.visualization.PieChart(
+          document.getElementById("piechart")
+        );
+        chart.draw(data, options);
+      }
+    </script>
+  </body>
+</html>
