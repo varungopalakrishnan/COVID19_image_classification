@@ -9,7 +9,8 @@ pandas
 Pillow
 scikit-learn
 scipy
-tensorboard
+setuptools==48.0.0
+tensorboard==1.14.0
 tensorboard-plugin-wit
 tensorflow
-tensorflow-estimator
+tensorflow-estimator==1.14.0rc0
