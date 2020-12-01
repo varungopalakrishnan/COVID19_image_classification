@@ -7,3 +7,5 @@ $ git push heroku master
 
 export FLASK_APP=flask_server.py
 flask run
+
+https://predict-covid19.azurewebsites.net/
