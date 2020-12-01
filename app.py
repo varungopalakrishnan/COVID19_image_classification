@@ -1,5 +1,4 @@
 from flask import request, jsonify, send_from_directory, render_template, Flask
-from flask_cors import CORS, cross_origin
 import base64
 import numpy as np
 import io
@@ -13,7 +12,6 @@ RES_FOLDER = os.path.join('static', 'resources')
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = RES_FOLDER
-cors = CORS(app)
 
 
 def get_model():
@@ -45,7 +43,6 @@ def home():
 
 
 @app.route('/predict', methods=['POST', 'GET'])  # get not required
-@cross_origin()
 def predict():
     message = request.get_json(force=True)
     encoded = message['image']
